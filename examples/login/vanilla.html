@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<title>no expromptum &mdash; login</title>
+<link href="../../expromptum.css" rel="stylesheet"/>
+<link href="../../favicon.ico" rel="icon"/>
+<style>
+    button
+    {
+        padding: 3px;
+    }
+    [role=alert]
+    {
+        display: none;
+    }
+    .invalid + [role=alert]
+    {
+        display: block;
+        position: absolute;
+        margin-top: 1.5em;
+    }
+</style>
+<form method="post" oninput="this[3].disabled = !this.checkValidity()">
+    <input name="email" placeholder="Email" type="email" required onblur="this.classList.toggle('invalid', !this.checkValidity())">
+    <span role="alert">Enter a&nbsp;valid email address.</span>
+    <input name="password" placeholder="Password" type="password" required>
+    <button type="button" onclick="this.previousElementSibling.type = this.previousElementSibling.type === 'password'? '' : 'password'">©</button>
+    <input type="submit" value="Sign in" disabled>
+</form>

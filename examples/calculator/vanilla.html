@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <title>no expromptum &mdash; calculator</title>
+<link href="../../favicon.ico" rel="icon"/>
 <form oninput="this[3].value = eval(`(${ Number(this[0].value) })${ this[1].value }(${ Number(this[2].value) })`)">
-    <input type="number"/>
+    <input type="number">
     <select>
         <option>+</option>
         <option>-</option>
         <option>*</option>
         <option>/</option>
     </select>
-    <input type="number"/>
+    <input type="number">
     =
     <output></output>
 </form>
