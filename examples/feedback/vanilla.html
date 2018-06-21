@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<title>no expromptum &mdash; feedback</title>
+<link href="../../expromptum.css" rel="stylesheet">
+<link href="../../favicon.ico" rel="icon">
+<style>
+    label
+    {
+        font-weight: bold;
+    }
+    input:invalid
+    {
+        color: red;
+    }
+    input:disabled
+    {
+        opacity: .45;
+    }
+</style>
+<form method="post">
+    <div class="field">
+        <label for="field_name">Name</label>
+        <input name="name" id="field_name" required>
+    </div>
+    <div class="field">
+        <label for="field_email">Email</label>
+        <input name="email" id="field_email" type="email" required>
+    </div>
+    <div class="field">
+        <label for="field_message">Message</label>
+        <textarea name="message" id="field_message" required></textarea>
+    </div>
+    <div class="field">
+        <input type="submit" value="Send" disabled>
+    </div>
+    <div role="alert"></div>
+</form>
+<script>{
+    const form = document.forms[0]
+    const elements = Array.from(form.elements).slice(0, -1)
+    const alert = form.lastElementChild
+    function validate() {
+        const labels = elements.map(input => !input.checkValidity() && input.labels[0].innerText).filter(Boolean)
+        alert.textContent = labels.length? 'Fill fields: ' + labels.join(', ') : ''
+        form[3].disabled = !form.checkValidity()
+    }
+    form.oninput = validate
+    validate()
+}</script>
