@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<title>no expromptum &mdash; address book</title>
+<link  href="../../expromptum.css" rel="stylesheet"/>
+<link href="../../favicon.ico" rel="icon">
+<style>
+    .horizontal .field,
+    .horizontal .field_label,
+    .horizontal .field_control {
+        display: inline-block;
+        width: auto;
+    }
+
+    .card {
+        position: relative;
+        margin: 30px 0;
+    }
+    .card_compact_view {
+        position: absolute;
+        top: 0;
+        right: 0;
+    }
+
+    .compact_view .horizontal {
+        display: inline-block;
+    }
+    .compact_view .contacts_group button,
+    .compact_view .field_label,
+    .compact_view .hide_in_compact_view,
+    .compact_view .hide_nonfirst_in_compact_view {
+        display: none;
+    }
+    .compact_view .contacts_group,
+    .compact_view .hide_nonfirst_in_compact_view:first-child {
+        display: inline-block;
+    }
+
+    .hide_on_unselected,
+    .option.selected .hide_on_selected {
+        display: none;
+    }
+    .option.selected .hide_on_unselected {
+        display: inline;
+    }
+    button[disabled]
+    {
+        opacity: .45;
+    }
+</style>
+<form>
+	<span class="option">
+		<input name="all_compact_view" id="all_compact_view" value="true" type="checkbox"/>
+		<label for="all_compact_view">Close All</label>
+	</span>
+
+	<div class="fields card" aria-required="true">
+		<div class="horizontal">
+			<dl class="field">
+				<dt class="field_label"><label>Last name</label></dt>
+				<dd class="field_control">
+					<input name="last_name"/>
+				</dd>
+			</dl>
+
+			<dl class="field">
+				<dt class="field_label"><label>First name</label></dt>
+				<dd class="field_control">
+					<input name="first_name" id="first_name"/>
+				</dd>
+			</dl>
+
+			<dl class="field hide_in_compact_view">
+				<dt class="field_label"><label>Middle name</label></dt>
+				<dd class="field_control">
+					<input name="middle_name"/>
+				</dd>
+			</dl>
+		</div>
+
+		<dl class="field hide_in_compact_view">
+			<dt class="field_label"><label>Gender</label></dt>
+			<dd class="field_control">
+				<span class="option">
+					<input name="gender" id="gender_male" value="male" type="radio"/>
+					<label for="gender_male">male</label>
+				</span>
+				<span class="option">
+					<input name="gender" id="gender_female" value="female" type="radio"/>
+					<label for="gender_female">female</label>
+				</span>
+			</dd>
+		</dl>
+
+		<dl class="field date hide_in_compact_view">
+			<dt class="field_label"><label>Birthday</label></dt>
+			<dd class="field_control">
+				<input type="number" min="1" max="31">
+                <select>
+                    <option>Января</option>
+                    <option>Февраля</option>
+                    <option>Марта</option>
+                    <option>Апреля</option>
+                    <option>Мая</option>
+                    <option>Июня</option>
+                    <option>Июля</option>
+                    <option>Августа</option>
+                    <option>Сентября</option>
+                    <option>Октября</option>
+                    <option>Ноября</option>
+                    <option>Декабря</option>
+                </select>
+                <input type="number" min="1900" max="2018" maxlength="4">
+			</dd>
+		</dl>
+
+		<span class="hide_in_compact_view">Contacts</span>
+        <div class="contacts_group">
+            <div class="fields horizontal hide_nonfirst_in_compact_view">
+                <dl class="field">
+                    <dd class="field_control">
+                        <input name="value" id="contact">
+                    </dd>
+                </dl>
+                <dl class="field combobox hide_in_compact_view">
+                    <dt class="field_label"><label>Type</label></dt>
+                    <dd class="field_control">
+                        <input name="type" list="type_list" id="type" aria-controls="contact"/>
+                        <datalist id="type_list">
+                            <option data-type="tel">Home phone</option>
+                            <option data-type="tel">Mobile phone</option>
+                            <option data-type="email">Personal email</option>
+                            <option data-type="tel">Work phone</option>
+                            <option data-type="email">Work email</option>
+                        </datalist>
+                    </dd>
+                </dl>
+                <button type="button" class="repeat_append_button">+</button>
+                <button type="button" class="repeat_remove_button">&minus;</button>
+            </div>
+        </div>
+
+		<span class="option card_compact_view">
+			<input name="compact_view" id="compact_view" value="true" type="checkbox">
+			<label for="compact_view">Close</label>
+		</span>
+
+		<button type="button" class="repeat_append_button">Append person</button>
+		<button type="button" class="repeat_remove_button">Remove person</button>
+	</div>
+</form>
+
+<script>
+    let counter = 0
+    const form = document.forms[0]
+    const allCompactView = form.elements.all_compact_view
+    document.onchange = event => {
+        const target = event.target
+        const name = target.name
+        if(name.startsWith('compact_view')) {
+            target.closest('.card').classList.toggle('compact_view', target.checked)
+            update()
+        }
+        else if(name === 'all_compact_view') {
+            for(const checkbox of form.querySelectorAll('[name^=compact_view]')) {
+                checkbox.checked = target.checked
+                checkbox.dispatchEvent(new Event('change', { bubbles : true }))
+            }
+        }
+        else if(name.startsWith('type')) {
+            let type = ''
+            for(const option of target.list.options) {
+                if(target.value === option.value) {
+                    type = option.dataset.type
+                    break
+                }
+            }
+            document.getElementById(target.getAttribute('aria-controls')).type = type
+        }
+    }
+    document.onclick = event => {
+        const target = event.target
+        const classList = target.classList
+        if(classList.contains('repeat_append_button')) {
+            const container = target.parentElement
+            const clone = container.cloneNode(true)
+            for(const input of clone.querySelectorAll('input')) {
+                if('checkbox,radio'.includes(input.type)) {
+                    input.checked = false
+                }
+                else input.value = ''
+            }
+            for(const select of clone.querySelectorAll('select')) {
+                select[0].selected = true
+            }
+            const re = /(?:_repeated_\d+)?$/
+            const postfix = '_repeated_' + ++counter
+            for(const node of clone.querySelectorAll('[name]')) {
+                node.name = node.name.replace(re, postfix)
+            }
+            for(const node of clone.querySelectorAll('[id]')) {
+                node.id = node.id.replace(re, postfix)
+            }
+            for(const node of clone.querySelectorAll('[for]')) {
+                node.htmlFor = node.htmlFor.replace(re, postfix)
+            }
+            for(const node of clone.querySelectorAll('[aria-controls]')) {
+                node.setAttribute('aria-controls', node.getAttribute('aria-controls').replace(re, postfix))
+            }
+            clone.classList.remove('compact_view')
+            let buttons = clone.querySelectorAll('.repeat_append_button')
+            buttons = Array.from(buttons).filter(node => node !== target)
+            buttons.forEach((button, i) => i && button.parentElement.remove())
+            container.after(clone)
+            update()
+        }
+        else if(classList.contains('repeat_remove_button')) {
+            target.parentElement.remove()
+            update()
+        }
+    }
+    function update() {
+        const checkboxes = Array.from(form.querySelectorAll('[name^=compact_view]'))
+        if(checkboxes.every(node => node.checked)) {
+            allCompactView.checked = true
+            allCompactView.indeterminate = false
+        }
+        else if(checkboxes.some(node => node.checked)) {
+            allCompactView.indeterminate = true
+        }
+        else {
+            allCompactView.checked = false
+            allCompactView.indeterminate = false
+        }
+        for(const button of form.querySelectorAll('.repeat_remove_button')) {
+            const parentElement = button.parentElement
+            const next = parentElement.nextElementSibling
+            const prev = parentElement.previousElementSibling
+            button.disabled = (!next || !next.querySelector('.repeat_remove_button')) && (!prev || !prev.querySelector('.repeat_remove_button'))
+        }
+    }
+    update()
+</script>
+
+<script>
+	false && expromptum('form').first().val({
+		"person": [
+			{
+				"last_name": "Ivanov",
+				"first_name": "Ivan",
+				"gender": "male",
+				"birthday": "1980-02-03",
+				"contact": [
+					{
+						"value": '+1 234 567-89-00',
+						"type": 'Mobile phone'
+					},{
+						"value": "ivanov@mail.ru",
+						"type": "Personal email"
+					}
+				]
+			},{
+				"last_name": "Petrova",
+				"first_name": "Petra",
+				"gender": "female",
+				"birthday": "1980-11-30",
+				"contact": [
+					{
+						"value": "+1 234 567-89-01",
+						"type": "Mobile phone"
+					},{
+						"value": "petrova@mail.ru",
+						"type": "Personal email"
+					}
+				]
+			}
+		]
+	})
+</script>
